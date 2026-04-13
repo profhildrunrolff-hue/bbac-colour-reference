@@ -1,0 +1,205 @@
+<div id="bbac-root"></div>
+<script>
+(function(){
+  var root = document.getElementById('bbac-root');
+  var shadow = root.attachShadow({mode:'open'});
+
+  var css = `
+    :host { display:block; font-family: Georgia, serif; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    .wrap { background:#0e0c0a; color:#e8e0d4; min-height:500px; padding-bottom:2rem; }
+    header { padding:2rem 1.5rem 1.2rem; border-bottom:1px solid rgba(255,255,255,0.07); }
+    header h1 { font-size:1.8rem; font-weight:300; color:#f0e8dc; letter-spacing:0.02em; line-height:1.1; }
+    header h1 em { font-style:italic; color:#c9a96e; }
+    header p { margin-top:0.3rem; color:#8a8070; font-size:11px; letter-spacing:0.08em; text-transform:uppercase; font-family:Arial,sans-serif; }
+    .badge { display:inline-block; background:rgba(201,169,110,0.12); border:1px solid rgba(201,169,110,0.3); color:#c9a96e; font-size:9px; letter-spacing:0.1em; text-transform:uppercase; padding:3px 10px; border-radius:2px; margin-top:0.5rem; font-family:Arial,sans-serif; }
+    .infobox { margin:1.2rem 1.5rem 0; padding:0.9rem 1.2rem; background:rgba(143,188,176,0.07); border-left:2px solid #8fbcb0; border-radius:0 5px 5px 0; font-size:12px; color:#b8c8c4; font-family:Arial,sans-serif; line-height:1.6; }
+    .infobox strong { color:#8fbcb0; }
+    .warnbox { margin:0.8rem 1.5rem 0; padding:0.9rem 1.2rem; background:rgba(224,122,95,0.07); border-left:2px solid #e07a5f; border-radius:0 5px 5px 0; font-size:12px; color:#d4a898; font-family:Arial,sans-serif; line-height:1.6; }
+    .warnbox strong { color:#e07a5f; }
+    .controls { padding:1rem 1.5rem 0.5rem; display:flex; flex-wrap:wrap; gap:0.5rem; align-items:center; }
+    .search-wrap { position:relative; flex:1; min-width:180px; max-width:300px; }
+    .search-wrap input { width:100%; background:#1e1a15; border:1px solid rgba(255,255,255,0.07); color:#e8e0d4; font-family:Arial,sans-serif; font-size:13px; padding:7px 10px 7px 32px; border-radius:4px; outline:none; }
+    .search-wrap input:focus { border-color:rgba(201,169,110,0.4); }
+    .search-icon { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#8a8070; font-size:13px; pointer-events:none; }
+    .fbtn { background:#1e1a15; border:1px solid rgba(255,255,255,0.07); color:#8a8070; font-family:Arial,sans-serif; font-size:11px; padding:6px 13px; border-radius:4px; cursor:pointer; letter-spacing:0.05em; }
+    .fbtn:hover, .fbtn.on { border-color:#c9a96e; color:#c9a96e; background:rgba(201,169,110,0.08); }
+    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:1px; background:rgba(255,255,255,0.07); border-top:1px solid rgba(255,255,255,0.07); margin-top:0.8rem; }
+    .card { background:#1e1a15; cursor:pointer; transition:background 0.2s; }
+    .card:hover { background:#221e18; }
+    .card.open { background:#2a241c; }
+    .card.hide { display:none; }
+    .card-hd { display:flex; align-items:center; gap:0.8rem; padding:0.9rem 1.1rem 0.7rem; }
+    .sw { width:34px; height:34px; border-radius:50%; flex-shrink:0; box-shadow:0 0 0 1px rgba(255,255,255,0.06),0 2px 8px rgba(0,0,0,0.4); transition:transform 0.2s; }
+    .card:hover .sw { transform:scale(1.1); }
+    .cn { font-size:1.05rem; font-weight:400; color:#f0e8dc; line-height:1.2; }
+    .csub { font-size:10px; color:#8a8070; letter-spacing:0.07em; text-transform:uppercase; margin-top:1px; font-family:Arial,sans-serif; }
+    .body { max-height:0; overflow:hidden; transition:max-height 0.35s ease; padding:0 1.1rem; }
+    .card.open .body { max-height:900px; padding:0 1.1rem 1.1rem; }
+    .sec { margin-top:0.85rem; }
+    .slabel { font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:#8a8070; margin-bottom:3px; font-family:Arial,sans-serif; display:flex; align-items:center; gap:4px; }
+    .slabel::before { content:''; display:inline-block; width:10px; height:1px; background:currentColor; opacity:0.6; }
+    .stext { font-size:12px; color:#c8c0b4; line-height:1.6; font-family:Arial,sans-serif; }
+    .cnote { margin-top:0.7rem; padding:0.55rem 0.85rem; border-radius:4px; font-size:11px; line-height:1.55; font-family:Arial,sans-serif; }
+    .cnote.zh { background:rgba(230,50,50,0.08); border-left:2px solid rgba(230,50,50,0.4); color:#d4a8a8; }
+    .cnote.in { background:rgba(255,153,0,0.07); border-left:2px solid rgba(255,153,0,0.35); color:#d4c0a0; }
+    .nlabel { font-size:9px; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:2px; opacity:0.7; }
+    .pill { display:inline-block; margin-top:4px; padding:2px 9px; border-radius:3px; font-size:10px; font-style:italic; background:rgba(201,169,110,0.1); border:1px solid rgba(201,169,110,0.2); color:#c9a96e; font-family:Arial,sans-serif; }
+    .tpill { background:rgba(224,122,95,0.12); border-color:rgba(224,122,95,0.3); color:#e07a5f; }
+    .principles { margin:1.5rem 1.5rem 0; }
+    .principles h2 { font-size:1.3rem; font-weight:300; color:#f0e8dc; margin-bottom:1rem; padding-bottom:0.4rem; border-bottom:1px solid rgba(255,255,255,0.07); }
+    .pgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:0.8rem; }
+    .pc { background:#1e1a15; border:1px solid rgba(255,255,255,0.07); border-radius:5px; padding:0.9rem 1rem; }
+    .pc h3 { font-size:0.9rem; color:#c9a96e; margin-bottom:0.3rem; }
+    .pc p { font-size:11px; color:#8a8070; line-height:1.6; font-family:Arial,sans-serif; }
+    footer { margin:1.5rem 1.5rem 0; padding-top:1rem; border-top:1px solid rgba(255,255,255,0.07); color:#8a8070; font-size:10px; font-family:Arial,sans-serif; display:flex; justify-content:space-between; flex-wrap:wrap; gap:0.3rem; }
+  `;
+
+  var colours = [
+    {name:"Black",de:"Schwarz",hex:"#1a1a1a",g:"neutral",ad:"Luxury (Chanel, Prada), high-end technology (Apple, Mercedes), elegance, exclusivity. Signals premium quality, untouchability, timeless sophistication.",cl:"POSITIVE: Elegance, professionalism, authority, style-confidence. Black suit = competence, gravitas. Little black dress = timeless elegance. YOUTH: Boundary-marking, peer-group identity. CAUTION: Can read as distant, emotionally unavailable.",co:"Protection, dignity, clarity, boundary-setting. NEVER automatically pathologise! Youth wearing black = often healthy differentiation, not depression.",zh:"Primary mourning colour in Chinese tradition — worn at funerals, associated with death and inauspiciousness. A client choosing black first may be expressing grief, endings, or the weight of filial duty. Ask gently.",ind:"Associated with Saturn (Shani), protection from the evil eye, and mourning. Also worn as fashion by younger generations. In Hindu ritual contexts, often considered inauspicious for auspicious ceremonies.",tr:false},
+    {name:"Grey",de:"Grau",hex:"#888888",g:"neutral",ad:"Professionalism (consulting, technology, finance), neutrality, seriousness. Conveys objectivity, understatement, restrained elegance.",cl:"Business context: competence without dominance, team-compatibility. Signals: reasonable, balanced, unobtrusive. RISK: Can read as colourless, self-minimising, 'wanting to be invisible'.",co:"'Hold back', 'wait and see', caution. As the first and dominant colour = possible procrastination, hesitation. 'Stay invisible', 'wait it out'.",zh:"Neutral in Chinese colour symbolism — neither auspicious nor inauspicious. Associated with modesty and restraint, aligning with Confucian values of not standing out. Grey-dominant may reflect cultural pressure to efface oneself.",ind:"Generally neutral. In some Hindu traditions, associated with asceticism or renunciation. May reflect a client who values withdrawal from worldly concerns, or who has been conditioned towards self-erasure.",tr:false},
+    {name:"White",de:"Weiß",hex:"#d8d0c4",g:"neutral",ad:"Purity (medicine, wellness, hygiene), minimalism (Apple, Scandinavian design), clarity, freshness. Tech: innovation, simplicity.",cl:"Cleanliness, openness, innocence. White shirt = correctness, fresh start. RISK: impractical = possibly signals 'I don't need to do anything practical'. CRITICAL IN ASIA: mourning colour.",co:"New beginning, purity, clarity. But: can also mean emptiness ('the page is still blank').",zh:"IMPORTANT: White is the primary colour of mourning, death, and funerals in Chinese tradition. Bái (白) = death, loss, farewell. Do not assume 'fresh start' without asking.",ind:"White is associated with mourning and widowhood in Hindu tradition (widows traditionally wear white). Also associated with purity (Saraswati). Context is everything.",tr:false},
+    {name:"Brown",de:"Braun",hex:"#8b5e3c",g:"neutral",ad:"Naturalness (organic products, coffee, chocolate), craft, tradition. Wood associations = permanence, groundedness.",cl:"Grounded, pragmatic, modest. Brown clothing = 'I am practical, not glamorous'. Can read as solid but also dull. Earth tones = nature connection.",co:"Modesty, realism, 'stay with what you know'. As the third colour often: disillusionment, return to reality.",zh:"Earth (tǔ) is one of the five elements in Chinese cosmology, represented by yellow-brown tones. Brown may signal groundedness, ancestral connection, or the weight of practical family obligations.",ind:"Associated with the earth, soil, and natural materials. Linked to practicality and humility. Handle with sensitivity around shame or social position narratives.",tr:false},
+    {name:"Ochre",de:"Ocker",hex:"#c8870a",g:"neutral",ad:"Authenticity, substance, craft, 'terroir' (wine, regional products), patina. Vintage aesthetics, artisanal quality.",cl:"Authentic, grounded, creatively alternative. Ochre tones = artistic, individual, not mainstream.",co:"'Do something tangible', work ethic, practical approach.",zh:"Similar to yellow-earth tones — evokes agricultural tradition, ancestral land, and practicality. May carry associations with rural heritage or hard labour depending on family background.",ind:"Saffron and ochre are sacred colours in Hinduism, Buddhism, and Sikhism — worn by monks, sadhus, and during festivals. If selected by an Indian client, explore spiritual meaning before any other interpretation.",tr:false},
+    {name:"Silver",de:"Silber",hex:"#a8a8b0",g:"neutral",ad:"Technology (high-tech, automotive), future, precision, innovation. Metallic = modern, efficient, coolly professional.",cl:"Modern, futuristic, distanced-elegant. Can read as cold, emotionally distant. Technically perfectionist.",co:"'Be modern', 'function perfectly', 'emotions interfere'. Protection through technical perfection.",zh:"Silver (yín 银) is associated with the moon, femininity, and prosperity. May represent a desire for cool, modern success rather than traditional warmth.",ind:"Associated with the moon (Chandra) — feminine, cooling, and cyclical. Silver jewellery is culturally significant for women. May signal a connection to the feminine divine or to lunar cycles.",tr:false},
+    {name:"Gold",de:"Gold",hex:"#d4a017",g:"neutral",ad:"Success, prestige (premium brands, awards, banking), triumph, luxury. Golden accents = visibility, 'the best'.",cl:"Seeking attention, showing success, wanting to shine. Gold jewellery = self-worth or compensation? Small golden accents = self-value; dominant = compulsion to shine.",co:"'You must shine', 'be extraordinary', compensation for invisibility. Healthy in moderation (third colour 10–20%), problematic when dominant.",zh:"HIGHLY POSITIVE: Gold (jīn 金) is the colour of prosperity, luck, royalty, and celebration. Heavily used at Chinese New Year, weddings, and auspicious occasions. What reads as 'compulsion to shine' in Western interpretation may simply be an expression of aspirational family values. Always check.",ind:"Gold is sacred and deeply auspicious — worn at weddings, festivals, and religious ceremonies. Associated with Lakshmi (goddess of wealth and prosperity) and divine light. May express spiritual aspiration or family honour.",tr:false},
+    {name:"Lemon Yellow",de:"Zitronengelb",hex:"#f2e034",g:"yellow",ad:"Alertness (energy drinks, warning signs), intellect, attention, signal function. Taxi yellow = visibility, instant recognition.",cl:"Bold, striking, self-confident. Lemon yellow = 'I'm here!' but also possible nervous energy. Difficult to wear, requires self-assurance.",co:"'Be vigilant!', 'Think carefully!', intellectual rigour. Can signify hypervigilance.",zh:"Yellow (huáng 黄) was the imperial colour in China — reserved for the Emperor. Bright yellows can signal ambition, intellectual authority, or imperial aspirations. Explore family expectations around achievement.",ind:"Yellow is associated with knowledge (Saraswati), spring (Vasant Panchami), and auspiciousness. Worn at religious ceremonies. A vibrant, positive colour in most Indian cultural contexts.",tr:false},
+    {name:"Golden Yellow",de:"Goldgelb",hex:"#f0b840",g:"yellow",ad:"Warmth, joy of living (McDonald's, IKEA), optimism, accessibility, family, sun, generosity.",cl:"Friendly, warm, optimistic, open. Golden yellow = sunshine personality. RISK: compulsion towards positivity, 'must always be cheerful'.",co:"'It will be alright', 'be generous'. Ambivalent: genuine optimism or a performed compulsion towards positivity?",zh:"Gold-yellow is deeply auspicious — happiness, prosperity, family celebration. In Chinese cultural conditioning, maintaining a positive, harmonious front (miànzi / face) is crucial. The 'forced positivity' interpretation is particularly worth exploring here.",ind:"Highly auspicious — used in wedding ceremonies (turmeric rituals, haldi), religious contexts, and festive dress. Warmth, prosperity, and divine blessing. May also carry associations with the marriage market and family obligation.",tr:false},
+    {name:"Orange",de:"Orange",hex:"#f07020",g:"yellow",ad:"Accessibility (Amazon, Fanta, budget brands), friendly energy, call-to-action, movement. 'Buy now!', low threshold.",cl:"Active, energetic, friendly, sporty. Orange = accessibility, no distance. Can read as cheap if used carelessly.",co:"'Do it now!', 'get on with it!'. Ambivalent: healthy self-encouragement or internal pressure?",zh:"A warm, fortunate colour in Chinese culture — close to red in its positive associations. Orange is used in Buddhist temple offerings and is associated with happiness and enthusiasm. Generally a positive selection.",ind:"Deep orange-saffron is sacred in Hinduism and Buddhism. Associated with fire, the sun, and spiritual courage. The valence depends greatly on the shade and the client's background.",tr:false},
+    {name:"Red-Orange",de:"Rotorange",hex:"#e84820",g:"red",ad:"Urgency (sales, discounts, banners), action, intensity, 'last chance!'. Alarm character, provoking rapid response.",cl:"Very striking, attention-commanding. RISK: reads as aggressive, too demanding. Only wearable in small doses.",co:"'Hurry up!', 'It's burning!', panic-driver, internal stress generator. As the second colour after grey = self-flagellation.",zh:"The transition zone between lucky red and urgent orange. May amplify Chinese pressure-to-perform narratives. Explore the internal driver carefully in high-achieving family contexts.",ind:"Associated with fire and intense energy. In some North Indian bridal contexts, red-orange carries marriage and devotion associations. Explore whether urgency feels self-imposed or externally driven.",tr:false},
+    {name:"Vermillion Red",de:"Zinnoberrot",hex:"#d42010",g:"red",ad:"Life force, presence (Coca-Cola, Ferrari, fast food), energy, passion, appetite-stimulating. Instant attention.",cl:"Vivid, passionate, present, courageous. Red dress = 'I want to be seen'. RISK: read as aggressive.",co:"'Show yourself!', 'Be alive!', 'Take up space!'. Ambivalent: genuine vitality or overcompensation for earlier invisibility?",zh:"EXTREMELY POSITIVE: Red (hóng 红) is the most auspicious colour in Chinese culture — luck, prosperity, joy, celebration, weddings, and the New Year. What Western interpretation reads as 'wanting to be seen' may simply be an expression of joy and good fortune. Always ask.",ind:"Red is deeply auspicious — the colour of the bridal sari, sindoor, kumkum, and Durga (the goddess of power). Associated with fertility, love, and divine energy. Generally a very positive selection.",tr:false},
+    {name:"Carmine Red",de:"Karminrot",hex:"#b00020",g:"red",ad:"Passion, luxury (fashion, perfume, red wine), emotion, drama, intensity. Darker than vermillion = more mature, deeper.",cl:"Dramatic, emotionally intense, luxurious. Carmine = 'I feel deeply', theatrical. Red carpet, evening wear.",co:"'It is intense!', 'All or nothing!'. Parental voice often: a theatrical, emotionally intense reference figure.",zh:"Deeper reds carry weight and maturity in Chinese aesthetics — associated with dignity, refined celebration, and intense feeling. The theatrical parent-voice interpretation may resonate with families where emotional performance was expected.",ind:"Associated with depth of devotion, sacred ritual, and intense bhakti (devotion). The 'all or nothing' dynamic may connect to devotional or sacrificial family narratives.",tr:false},
+    {name:"Blood Red",de:"Blutrot",hex:"#800010",g:"red",ad:"Rarely used (except horror genre, extreme drama). Existential force, survival struggle.",cl:"Very rarely worn — too intense, too threatening. When worn: provocation, transgression, artistic statement.",co:"TRAUMA MARKER. 'Fight!', 'It's about survival!', fight-mode. If dominant: refer to trauma specialist.",zh:"Dark, coagulated blood-red carries strongly negative associations in Chinese culture — associated with violent death, bad omens, and misfortune. Warrants very sensitive, careful exploration.",ind:"Associated with Kali (the fierce goddess of destruction and transformation), sacrifice, and the shadow side of power. Can carry both intense fear and sacred warrior energy. Context is crucial.",tr:true},
+    {name:"Royal Red / Burgundy",de:"Königsrot",hex:"#700030",g:"red",ad:"Power, representation (classical institutions, royal houses), status, dignity, tradition. Dark, saturated red.",cl:"Dignified, representative, status-conscious. Royal red = 'I hold a position'. Business-red (ties) = power. RISK: arrogance, distance.",co:"'Be significant', 'maintain dignity', 'represent!'. Status consciousness, expectation of conduct, 'what will people think?'.",zh:"In Chinese aristocratic and official traditions, deep red-burgundy signals high status, authority, and ceremonial importance. May connect to strong family hierarchies or the pressure of being the 'representative' child.",ind:"Deep red is associated with royalty, power (Kshatriya warrior class), and sacred authority. May connect to caste identity, family prestige, or the burden of maintaining a respected family name.",tr:false},
+    {name:"Turquoise",de:"Türkis",hex:"#20a090",g:"blue",ad:"Communication (social media, wellness), freshness, digital, openness, water associations.",cl:"Friendly, communicative, open, refreshing. Turquoise = bridge-builder, non-threatening. Summer colour, holidays, lightness.",co:"'Connect!', 'Be open!', healthy relational capacity, bridge between emotion and reason.",zh:"Not a central traditional colour, but in contemporary Malaysian Chinese context associated with freshness, youth, and digital-age openness. May signal a desire to integrate tradition and modernity.",ind:"Associated with Krishna (the divine lover and teacher), water, and sky. Carries lightness and spiritual connection in many Hindu traditions.",tr:false},
+    {name:"Sky Blue",de:"Himmelblau",hex:"#78b8e0",g:"blue",ad:"Trust (aviation, travel), peace, optimism, lightness, safety, spaciousness.",cl:"Trustworthy, peaceful, open, hopeful. Light blue shirt = approachable, non-threatening. Baby blue = innocence. CAUTION: can read as naive.",co:"BROAD SPECTRUM! Positive: peace, trust, exhaling. Neutral: dissociation, drifting away. Problematic: giving up, collapse. NEVER automatically read as exhaustion!",zh:"Sky blue is associated with heaven (tiān 天), clarity, and aspirational thinking in Chinese cosmology. In modern Malaysian Chinese contexts, it conveys openness and accessibility.",ind:"Associated with Vishnu (the preserver) and Krishna — divine blue is sacred. Also associated with the sky, infinity, and the free spirit. A deeply positive colour in many Indian contexts.",tr:false},
+    {name:"Navy Blue",de:"Preußischblau / Marineblau",hex:"#1a3060",g:"blue",ad:"Tradition, structure (government, classic banks, navy), discipline, reliability, correctness.",cl:"Disciplined, correct, structured, reliable. Navy suit = conservative-serious, establishment. School uniforms. Can read as rigid.",co:"'Follow the rules!', 'Be correct!', authoritarian upbringing, 'that's how it's done'.",zh:"In Chinese educational and professional contexts, dark blue uniforms are heavily associated with school discipline, Confucian hierarchy, and correct conduct. May connect strongly to rule-following and filial piety narratives.",ind:"Associated with authority, the professional class, and formal institutions. May connect to parental authority figures or caste/professional expectations.",tr:false},
+    {name:"Royal Blue",de:"Ultramarinblau / Königsblau",hex:"#2040a0",g:"blue",ad:"Vision (UN, NGOs, premium technology), idealism, professionalism, depth, far-sightedness.",cl:"Idealistic, far-sighted, professional, meaningful. Royal blue = distinguished, considered. Less everyday than navy = a conscious choice.",co:"'Think bigger!', 'Be idealistic!'. Ambivalent: inspiration or disconnection from daily life?",zh:"Less traditionally coded than other blues. In contemporary contexts may signal ambition, global outlook, and the aspiration of the educated professional class.",ind:"Associated with Vishnu and divine consciousness. Also with the intellectual class and serious professional ambition.",tr:false},
+    {name:"Petrol / Teal",de:"Petrol",hex:"#1a6060",g:"blue",ad:"Intellect, sophistication (premium brands, science, luxury), mystery, depth, complexity.",cl:"Complex, intellectual, inaccessibly elegant. Petrol = 'I am deep', not superficial. Can read as distant, emotionally cool.",co:"'Go deeper!', 'Be complex!', protection through inaccessibility, intellectual distance as defence.",zh:"In Chinese cultural contexts, depth and complexity are valued but may be expressed differently — as the 'inscrutable' or quietly powerful figure. Explore whether intellectual distance is a survival strategy in the family system.",ind:"May connect to the intellectual, philosophical tradition. In some traditions, teal-green is associated with healing and the heart.",tr:false},
+    {name:"Indigo",de:"Indigo",hex:"#3820a0",g:"blue",ad:"Spirituality (wellness, yoga, spiritual brands), intuition, mysticism, deeper knowing.",cl:"Spiritual, introspective, meditative. Indigo = 'I am seeking deeper meaning'. Yoga wear, spiritual communities. Rarely in business.",co:"'Trust your intuition!', 'There is more than what is visible!'. Ambivalent: world-flight or genuine spirituality?",zh:"Less traditionally significant in Chinese colour symbolism, but in contemporary contexts associated with new-age spirituality and individual seeking beyond tradition.",ind:"Indigo (neel) has deep cultural roots in India — historically significant as a dye and associated with transformation and the sacred. Connected to Saturn and karmic depth. A spiritually loaded selection for many Indian clients.",tr:false},
+    {name:"May Green",de:"Maigrün",hex:"#70d040",g:"green",ad:"Freshness (spring fashion, organic, healthy food), new beginning, youth, hope, vitality, growth.",cl:"Fresh, youthful, hopeful, vital. May green = 'I am starting again', spring, lightness. Can read as immature.",co:"'Start fresh!', 'Everything is possible!'. Ambivalent: genuine hope or naive denial?",zh:"Green (lǜ 绿) in Chinese culture is generally positive but can carry some complexity — the phrase 'wearing a green hat' (戴绿帽子) is a euphemism for being cuckolded. Younger, educated clients may not hold this association, but be aware.",ind:"Associated with nature, fertility, and the Muslim tradition. Highly auspicious in many South Indian Hindu traditions — worn for prosperity and new beginnings.",tr:false},
+    {name:"Grass Green",de:"Grasgrün",hex:"#40a020",g:"green",ad:"Growth, nature (natural cosmetics, sport, organic), vitality, environment, organic development.",cl:"Natural, vital, growth-oriented, healthy. Grass green = 'I am alive, organic'. Outdoor, sport. Universally positive.",co:"'Develop!', 'Be natural!', organic growth. Rarely problematic.",zh:"Generally positive in modern Chinese-Malaysian context. Nature, vitality, and the growth aspiration align well with the values of younger-generation clients.",ind:"Associated with fertility, abundance, and the natural world. Worn by brides in some South Indian traditions. Broadly positive across Hindu, Muslim, and Sikh contexts.",tr:false},
+    {name:"Mint Green",de:"Mintgrün",hex:"#80e0c0",g:"green",ad:"Wellness (pharmacy, spa, dental), gentleness, calming, healing, freshness, clinical cleanliness.",cl:"Gentle, healing, calming, nurturing. Mint green = 'I am caring', clinical heritage. Can read as sterile.",co:"'Be gentle with yourself', 'Heal!', self-care voice, inner healer.",zh:"In Chinese-Malaysian and broader Asian contexts, mint/clinical green is associated with hospitals and medicine. A client selecting this colour may be processing illness, caregiving roles, or a longing for healing and rest.",ind:"Similar hospital/medical associations. May connect to caregiving roles (often female-coded in Indian families), or to healing after illness.",tr:false},
+    {name:"Forest Green",de:"Tannengrün / Dunkelgrün",hex:"#1a5020",g:"green",ad:"Permanence (forestry, outdoor, tradition), nature, durability, quality, perseverance.",cl:"Stable, enduring, reliable, traditional. Dark green = 'I endure', outdoor wear, hunting, British tradition. Can read as heavy.",co:"'Stand firm!', 'Be reliable!', perseverance, 'stay tough'.",zh:"Dark green carries connotations of endurance, longevity, and the permanence of nature in Chinese thinking. May connect to family values around loyalty, endurance, and not abandoning one's duties.",ind:"Associated with nature, forests, and the deep feminine. In Tamil Nadu, dark green is associated with Murugan (the warrior god). May signal a client who carries a strong sense of duty.",tr:false},
+    {name:"Olive Green",de:"Olivgrün",hex:"#707020",g:"green",ad:"Pragmatism, military associations, outdoor, robust quality, earthiness.",cl:"Pragmatic, robust, functionally military. Olive = 'I am practical', cargo trousers, utility fashion.",co:"Pragmatic balance, grounded approach, functional.",zh:"May carry associations with military service, discipline, or the pragmatic working class. Explore family backgrounds around service, sacrifice, or functional identity.",ind:"Military and earthy associations. May connect to themes of service, duty, and pragmatic survival. In some farming communities, olive-earth tones are the colours of daily work and groundedness.",tr:false},
+    {name:"Green as First Colour",de:"Grün als erste Farbe",hex:"#30902a",g:"green",ad:"Harmony, balance, equilibrium — but SEQUENCE matters!",cl:"When green is dominant in the wardrobe = 'harmony is important to me'. Complete green outfits = peace message, possible conflict-avoidance.",co:"HARMONY-SEEKER! Questions: 'For whom are you creating harmony — for yourself or for others?' 'What happens when harmony is not possible?' May = conflict-avoidance, own needs pushed aside.",zh:"In Chinese family and social contexts, harmony (hé 和) is a core Confucian value — social smoothness, face-saving, and not rocking the boat are actively taught. A green-first client may be expressing deep cultural conditioning around peace-keeping rather than a personal preference. Explore gently.",ind:"Harmony and non-conflict (ahimsa, shanti) are central values in Hindu, Buddhist, and Jain traditions. A green-first selection may reflect spiritual teaching or family conditioning around 'being the peacemaker'. Explore whose peace is being kept.",tr:false},
+    {name:"Magenta / Hot Pink",de:"Magenta / Pink",hex:"#d02080",g:"violet",ad:"Energy, creativity (T-Mobile, cosmetics, fashion), femininity, youth, boldness, conspicuousness.",cl:"Bold, energetic, feminine, creative. Pink = self-confidence, no fear of attention. 'Barbie pink' = provocation or celebration?",co:"Creative energy, feminine self-empowerment. Can also = adaptation to female stereotypes.",zh:"In Chinese-Malaysian contexts, pink and magenta are associated with romance, weddings, and femininity. May carry the weight of expectations around female beauty, marriageability, and family approval.",ind:"Pink is a bridal colour in some North Indian communities (particularly Rajasthani). Associated with femininity, love, and celebration. May connect to marriage expectations or the celebration of womanhood.",tr:false},
+    {name:"Rose / Dusty Rose",de:"Rosa / Altrosa",hex:"#e0a0b0",g:"violet",ad:"Softness, romance (cosmetics, baby products, romance), delicacy, innocence, feminine elegance.",cl:"Gentle, romantic, delicate, soft. Rose = traditionally feminine, nurturing. Dusty rose = adult elegance. RISK: read as weak.",co:"Softness, delicacy, possibly also = self-infantilisation, 'stay small'.",zh:"In Chinese-Malaysian culture, pale pink can be associated with the 'good girl' — gentle, pleasing, and not threatening. May signal a client navigating the tension between traditional female softness and personal ambition.",ind:"Light pink associated with femininity, romance, and the Mughal aesthetic. May connect to family expectations about female behaviour — gentle, supportive, selfless.",tr:false},
+    {name:"Lavender / Blue-Violet",de:"Blauviolett / Lavendel",hex:"#8060d0",g:"violet",ad:"Mysticism, spirituality (wellness, luxury, art), creativity, introspection, depth.",cl:"Spiritual, creative, introspective, mystical. Violet = 'I am different', artistic, not mainstream. Can read as eccentric.",co:"'Seek meaning!', 'Go inward!'. Ambivalent: genuine spirituality or world-flight?",zh:"Purple has historically been associated with nobility and high status in Chinese culture. In contemporary contexts, lavender/violet signals creativity and individuality — which may be in tension with family conformity expectations.",ind:"Associated with spiritual seeking and the sixth chakra (ajna — intuition and insight). Lavender particularly connected to refinement and the aspiration towards higher consciousness.",tr:false},
+    {name:"Purple / Red-Violet",de:"Rotviolett / Purpur",hex:"#901060",g:"violet",ad:"Artistic, luxurious (fashion, art, premium), individual, transformative, royal (historically).",cl:"Artistic, unique, luxurious, individual. Purple = 'I am creative', transformation. Historically = power (most expensive dye).",co:"'Be unique!', 'Transform!', artist-self, creative identity.",zh:"Historically, purple was associated with the Pole Star (紫微, zǐwēi) and imperial power in Chinese cosmology. In modern contexts, it signals individual artistry and transformation — possibly in tension with family demands for practical achievement.",ind:"Associated with the crown chakra (sahasrara) — the highest spiritual attainment. Also with royalty and the sacred. A client choosing purple may be expressing a deep desire for transformation or spiritual significance.",tr:false},
+    {name:"Black-Violet",de:"Schwarzviolett",hex:"#2a0840",g:"violet",ad:"Very rarely used — mystery, dark exclusivity (premium niches, luxury), depth.",cl:"Very rarely — extremely dark, nearly black. Black-violet = 'mystery', dark elegance. Artistic contexts, Gothic. Very intense.",co:"'In the darkness lies power', 'Transform radically!', crisis-manager, shadow-worker. If dominant: trauma-check.",zh:"A very intense, uncommon selection. May signal deep internal conflict, hidden grief, or the carrying of family secrets. Requires careful, non-pathologising exploration.",ind:"Very rarely worn. May connect to Kali worship, radical transformation, or the navigation of profound difficulty. A respectful, curious approach is essential.",tr:true},
+    {name:"Aubergine",de:"Aubergine",hex:"#501830",g:"violet",ad:"Depth, maturity (luxury furniture, premium wine, avant-garde fashion), sophistication, muted opulence, complexity.",cl:"Complex, mature, sophisticated, quietly elegant. Aubergine = 'I am multi-layered', cultivated restraint. Can read as sombre.",co:"RED + BLUE + BLACK = muted passion. 'It is complicated', 'I am multi-layered'. Biographically often: passion was suppressed, 'being simple was not allowed'.",zh:"This muted, complex colour may speak powerfully to clients who have had to suppress emotional depth or individuality for family harmony. The narrative of 'passion was dampened' may resonate with Confucian expectations around emotional restraint.",ind:"The combination of red (passion, sacred), blue (depth, devotion), and black (shadow) makes aubergine a psychologically rich choice. May connect to unexpressed intensity, restrained devotion, or a life lived in the shadow of someone else's story.",tr:false}
+  ];
+
+  var principles = [
+    {t:"1. Sequence Over Single Colour",p:"Black as the 1st colour has entirely different significance to black as the 3rd. The order reveals the behavioural pattern."},
+    {t:"2. Proportion Decides",p:"10% black = healthy boundary. 80% black = dominant defence. The proportions are decisive, not the colour alone."},
+    {t:"3. Never Pathologise Automatically",p:"Especially for black, sky blue, and aubergine — these have highly positive aspects. Always explore the full spectrum."},
+    {t:"4. Cultural Codes First",p:"Several colours carry opposite meanings across cultures. Red = prosperity in Chinese culture (not aggression). White = mourning in Asian traditions (not purity). Always ask before interpreting."},
+    {t:"5. Watercolour Specifics",p:"Much water = release, yielding. Little water = control. Wet-in-wet = integration. Sharp edges = separation."},
+    {t:"6. Clarify Training Artefacts",p:"'Yellow first' (watercolour rule) distorts sequence. Before painting: 'Have you had art lessons? Today there are no rules.'"},
+    {t:"7. The Client Is Always the Expert",p:"We ask, we do not interpret. Left = past, right = future is an offer — always verify whether the client experiences it that way."}
+  ];
+
+  var activeCard = null;
+  var currentGroup = 'all';
+
+  function build() {
+    var html = '<div class="wrap">';
+
+    // Header
+    html += '<header>';
+    html += '<div class="header-text">';
+    html += '<h1>Colour Meanings <em>&amp;</em> Coaching Reference</h1>';
+    html += '<p>Farbgespräche · 3-Colour Exercise · Biography-Based Art Coaching</p>';
+    html += '<span class="badge">Malaysia Cohort · British English · Cultural Adaptation</span>';
+    html += '</div></header>';
+
+    // Info boxes
+    html += '<div class="infobox"><strong>How to use:</strong> Click any colour to reveal its meanings. Each entry covers Advertising associations, Everyday Clothing signals, Coaching significance, and culturally-adapted notes for <strong>Chinese-Malaysian</strong> and <strong>Indian</strong> contexts. <em>The sequence (1st / 2nd / 3rd colour) and proportion always matter more than the individual colour. Always ask: "What does this colour mean to you personally?"</em></div>';
+    html += '<div class="warnbox"><strong>⚠ Cultural Priority Note:</strong> Red = prosperity &amp; luck in Chinese culture (not aggression). Yellow = imperial colour in China. White = mourning/farewell in many Asian traditions (not purity). Black = mourning in Chinese &amp; Indian contexts. <strong>Always ask first. These are orientations, not diagnoses.</strong></div>';
+
+    // Controls
+    html += '<div class="controls" id="bcontrols">';
+    html += '<div class="search-wrap"><span class="search-icon">&#9906;</span><input type="text" placeholder="Search colours…" id="bsearch" oninput="bfilter()"></div>';
+    html += '<button class="fbtn on" onclick="bgroup(\'all\',this)">All</button>';
+    html += '<button class="fbtn" onclick="bgroup(\'neutral\',this)">Neutrals</button>';
+    html += '<button class="fbtn" onclick="bgroup(\'red\',this)">Reds</button>';
+    html += '<button class="fbtn" onclick="bgroup(\'yellow\',this)">Yellows &amp; Orange</button>';
+    html += '<button class="fbtn" onclick="bgroup(\'blue\',this)">Blues</button>';
+    html += '<button class="fbtn" onclick="bgroup(\'green\',this)">Greens</button>';
+    html += '<button class="fbtn" onclick="bgroup(\'violet\',this)">Violets &amp; Pink</button>';
+    html += '</div>';
+
+    // Grid
+    html += '<div class="grid" id="bgrid">';
+    colours.forEach(function(c, i) {
+      html += '<div class="card" data-g="'+c.g+'" data-n="'+(c.name+' '+c.de).toLowerCase()+'" id="bcard'+i+'" onclick="btoggle('+i+')">';
+      html += '<div class="card-hd"><div class="sw" style="background:'+c.hex+'"></div>';
+      html += '<div><div class="cn">'+c.name+'</div><div class="csub">'+c.de+'</div></div></div>';
+      html += '<div class="body" id="bbody'+i+'">';
+      html += '<div class="sec"><div class="slabel">Advertising</div><div class="stext">'+c.ad+'</div></div>';
+      html += '<div class="sec"><div class="slabel">Everyday Clothing</div><div class="stext">'+c.cl+'</div></div>';
+      html += '<div class="sec"><div class="slabel">Coaching Significance</div><div class="stext">'+c.co+'</div>';
+      if(c.tr) html += '<span class="pill tpill">⚠ Trauma marker — refer to specialist if dominant</span>';
+      html += '</div>';
+      html += '<div class="cnote zh"><div class="nlabel">🇲🇾 Chinese-Malaysian Context</div>'+c.zh+'</div>';
+      html += '<div class="cnote in"><div class="nlabel">🪷 Indian Context</div>'+c.ind+'</div>';
+      html += '</div></div>';
+    });
+    html += '</div>';
+
+    // Principles
+    html += '<div class="principles"><h2>7 Principles for Practice</h2><div class="pgrid">';
+    principles.forEach(function(p) {
+      html += '<div class="pc"><h3>'+p.t+'</h3><p>'+p.p+'</p></div>';
+    });
+    html += '</div></div>';
+
+    // Footer
+    html += '<footer><span>© Biography-Based Art Coaching · Prof. Hildrun Rolff · earth-s Institut</span><span><em>The client is always the expert for their own colours</em></span></footer>';
+    html += '</div>';
+
+    return html;
+  }
+
+  // Inject
+  var styleEl = document.createElement('style');
+  styleEl.textContent = css;
+  shadow.appendChild(styleEl);
+  var wrapper = document.createElement('div');
+  wrapper.innerHTML = build();
+  shadow.appendChild(wrapper);
+
+  // Functions exposed on shadow host
+  shadow.btoggle = function(i) {
+    var card = shadow.getElementById('bcard'+i);
+    if(activeCard !== null && activeCard !== i) {
+      shadow.getElementById('bcard'+activeCard).classList.remove('open');
+    }
+    card.classList.toggle('open');
+    activeCard = card.classList.contains('open') ? i : null;
+  };
+  shadow.bfilter = function() {
+    var q = shadow.getElementById('bsearch').value.toLowerCase();
+    shadow.querySelectorAll('.card').forEach(function(card) {
+      var ms = !q || card.dataset.n.includes(q);
+      var mg = currentGroup === 'all' || card.dataset.g === currentGroup;
+      card.classList.toggle('hide', !ms || !mg);
+    });
+  };
+  shadow.bgroup = function(g, btn) {
+    currentGroup = g;
+    shadow.querySelectorAll('.fbtn').forEach(function(b){ b.classList.remove('on'); });
+    btn.classList.add('on');
+    shadow.bfilter();
+  };
+
+  // Bind to global scope from within shadow
+  var s = shadow;
+  window.btoggle = function(i){ s.btoggle(i); };
+  window.bfilter = function(){ s.bfilter(); };
+  window.bgroup = function(g,btn){ s.bgroup(g,btn); };
+
+})();
+</script>
